@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <ninecraft/android/android_string.h>
 #include <ninecraft/app_context.h>
+#include <ancmp/abi_fix.h>
 
 #define MINECRAFT_LOCAL_PLAYER_OFFSET_0_5_0 0x2d8
 #define MINECRAFT_LOCAL_PLAYER_OFFSET_0_5_0_J 0x170
@@ -656,7 +657,7 @@ typedef void (*ninecraft_app_handle_back_t)(void *ninecraft_app, bool keep_scree
 
 extern ninecraft_app_handle_back_t ninecraft_app_handle_back;
 
-typedef void (*minecraft_client_set_size_t)(void *minecraft_client, uint32_t width, uint32_t height, float px);
+typedef void (FLOAT_ABI_FIX *minecraft_client_set_size_t)(void *minecraft_client, uint32_t width, uint32_t height, float px);
 
 extern minecraft_client_set_size_t minecraft_client_set_size;
 
