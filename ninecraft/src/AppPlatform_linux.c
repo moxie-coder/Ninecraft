@@ -1135,7 +1135,11 @@ void AppPlatform_linux$readAssetFile(asset_file *ret, AppPlatform_linux *app_pla
     }
     asset_file asset;
 
-    FILE *file = fopen(path, "rb");
+    FILE *file = NULL;
+
+    if (strlen(android_string_to_str(path_str)) >= 1) {
+        file = fopen(path, "rb");
+    }
     if (!file) {
         printf("Error[%d] failed to read %s\n", errno, path);
         free(path);
@@ -1159,7 +1163,7 @@ SYSV_WRAPPER(AppPlatform_linux$readAssetFile_0_9_0, 3)
 void AppPlatform_linux$readAssetFile_0_9_0(android_string_t *ret, AppPlatform_linux *app_platform, android_string_t *path_str) {
     asset_file asset;
     AppPlatform_linux$readAssetFile(&asset, app_platform, path_str);
-    if (asset.data == NULL && asset.size == -1) {
+    if (asset.data == NULL || asset.size < 1) {
         android_string_cstr(ret, "");
     } else {
         android_string_cstrl(ret, asset.data, asset.size);
