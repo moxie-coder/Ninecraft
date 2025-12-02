@@ -1181,7 +1181,7 @@ static void key_callback(struct SDL_Window *window, int key, int scancode, int a
                         }
                     }
                 }
-            } else if (version_id >= version_id_0_1_1 && key == SDLK_ESCAPE) {
+            } else if (version_id >= version_id_0_1_1 && (key == SDLK_ESCAPE || key == SDLK_AC_BACK)) {
                 if (action == SDL_KEYDOWN) {
                     if (version_id >= version_id_0_10_0) {
 #ifdef _WIN32
