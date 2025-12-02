@@ -674,7 +674,7 @@ bool AppPlatform_linux$supportsTouchscreen(AppPlatform_linux *app_platform) {
 
 bool AppPlatform_linux$supportsVibration(AppPlatform_linux *app_platform) {
     //puts("debug: AppPlatform_linux::supportsVibration");
-    return false;
+    return true;
 }
 
 void AppPlatform_linux$getSessionIDAndRefreshToken(AppPlatform_linux *app_platform, android_string_t *session_id, android_string_t *refresh_token) {
@@ -1196,6 +1196,17 @@ void AppPlatform_linux$uploadPlatformDependentData(AppPlatform_linux *app_platfo
 
 void AppPlatform_linux$vibrate(AppPlatform_linux *app_platform, int milliseconds) {
     //puts("debug: AppPlatform_linux::vibrate");
+    SDL_Haptic *haptic = SDL_HapticOpen(0);
+    if (haptic == NULL) {
+        return;
+    }
+    if (SDL_HapticRumbleInit(haptic) != 0) {
+        return;
+    }
+    if (SDL_HapticRumblePlay(haptic, 1, milliseconds) != 0) {
+        return;
+    }
+    SDL_HapticClose(haptic);
 }
 
 void AppPlatform_linux$destroy(AppPlatform_linux *app_platform) {

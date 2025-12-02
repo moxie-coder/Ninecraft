@@ -1756,6 +1756,7 @@ int main(int argc, char **argv) {
         free(icon_path);
         return 1;
     }
+    SDL_Init(SDL_INIT_HAPTIC);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
