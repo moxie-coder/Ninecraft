@@ -11,14 +11,16 @@ ARCH="$1"
 
 # Build
 ROOT="$(cd ../ && pwd)"
-mkdir -p "${ROOT}/build"
+BUILD="build-docker-${ARCH}"
+mkdir -p "${ROOT}/${BUILD}"
 docker run \
     --volume "${ROOT}:/data" \
     --user "$(id -u):$(id -g)" \
     --rm \
+    --workdir "/data/${BUILD}" \
     "ninecraft-build-${ARCH}" \
-    sh -c 'cd /data/build && cmake -DUSE_SYSTEM_DEPENDENCIES=ON .. && cmake --build .'
+    sh -c 'cmake -DUSE_SYSTEM_DEPENDENCIES=ON .. && cmake --build .'
 
 # Package
-cp "${ROOT}/build/ninecraft/ninecraft" run
+cp "${ROOT}/${BUILD}/ninecraft/ninecraft" run
 ./prepare.sh run "${ARCH}"
