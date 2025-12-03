@@ -5,26 +5,76 @@ set -e
 # Arguments
 ARCH="$1"
 
-# Run
-get() {
+# Utility Functions
+pass_env() {
     VAR="$1"
     eval "VALUE=\${${VAR}}"
     echo "${VAR}=${VALUE}"
 }
-exec docker run \
+pass_volume() {
+    VAR="$1"
+    eval "VALUE=\${${VAR}}"
+    echo "${VALUE}:${VALUE}"
+}
+
+# Basic Arguments
+set -- docker run \
     --rm \
-    --privileged \
-    --tty \
-    --hostname "$(hostname)" \
-    --volume "$(pwd):/data" \
-    --workdir '/data' \
-    --env "$(get GALLIUM_HUD)" \
-    --env "SDL_VIDEODRIVER=wayland,x11" \
-    --volume '/tmp/.X11-unix:/tmp/.X11-unix' \
-    --env "$(get DISPLAY)" \
-    --volume "${XAUTHORITY}:${XAUTHORITY}" \
-    --env "$(get XAUTHORITY)" \
-    --volume "${XDG_RUNTIME_DIR}:${XDG_RUNTIME_DIR}" \
-    --env "$(get XDG_RUNTIME_DIR)" \
-    --env "$(get WAYLAND_DISPLAY)" \
+    --tty
+
+# Access Current Directory
+DATA_ROOT='/data'
+set -- "$@" \
+    --volume "$(pwd):${DATA_ROOT}" \
+    --workdir "${DATA_ROOT}"
+
+# HUD
+# https://docs.mesa3d.org/envvars.html#gallium-environment-variables
+set -- "$@" \
+    --env "$(pass_env GALLIUM_HUD)"
+
+# Wayland/X11
+if [ "${XDG_SESSION_TYPE}" = 'wayland' ]; then
+    set -- "$@" \
+        --env 'SDL_VIDEODRIVER=wayland' \
+        --volume "$(pass_volume XDG_RUNTIME_DIR)" \
+        --env "$(pass_env XDG_RUNTIME_DIR)" \
+        --env "$(pass_env WAYLAND_DISPLAY)"
+else
+    X11_SOCKET='/tmp/.X11-unix'
+    set -- "$@" \
+        --env "SDL_VIDEODRIVER=x11" \
+        --volume "$(pass_volume X11_SOCKET)" \
+        --env "$(pass_env DISPLAY)" \
+        --volume "$(pass_volume XAUTHORITY)" \
+        --env "$(pass_env XAUTHORITY)" \
+        --hostname "$(hostname)"
+fi
+
+# Audio
+PULSE_SOCKET="${XDG_RUNTIME_DIR}/pulse/native"
+PULSE_COOKIE="${HOME}/.config/pulse/cookie"
+set -- "$@" \
+    --env 'SDL_AUDIODRIVER=pulseaudio' \
+    --volume "$(pass_volume PULSE_SOCKET)" \
+    --volume "$(pass_volume PULSE_COOKIE)" \
+    --env "PULSE_SERVER=unix:${PULSE_SOCKET}"
+
+# OpenGL Acceleration
+VIRGL='/tmp/.virgl_test'
+if fuser "${VIRGL}" > /dev/null 2>&1; then
+    set -- "$@" \
+        --volume "$(pass_volume VIRGL)" \
+        --env 'LIBGL_ALWAYS_SOFTWARE=1' \
+        --env 'GALLIUM_DRIVER=virpipe'
+else
+    set -- "$@" \
+        --device /dev/dri
+fi
+
+# Docker Image
+set -- "$@" \
     "ninecraft-run-${ARCH}"
+
+# Run
+exec "$@"

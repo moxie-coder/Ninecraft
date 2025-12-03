@@ -46,6 +46,5 @@ docker build \
     --build-arg "$(get CONTAINER_PREFIX)" \
     --build-arg "USER_ID=$(id -u)" \
     --build-arg "GROUP_ID=$(id -g)" \
-    --build-arg "RENDER_GROUP_ID=$(gid render)" \
-    --build-arg "VIDEO_GROUP_ID=$(gid video)" \
+    --build-arg "EXTRA_GROUP_IDS=$(gid render) $(gid video) $(gid audio)" \
     .

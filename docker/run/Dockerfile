@@ -23,13 +23,14 @@ RUN \
 # Setup User
 ARG USER_ID
 ARG GROUP_ID
-ARG RENDER_GROUP_ID
-ARG VIDEO_GROUP_ID
+ARG EXTRA_GROUP_IDS
 RUN \
     groupadd --non-unique --gid "${GROUP_ID}" main && \
-    groupadd --non-unique --gid "${RENDER_GROUP_ID}" one && \
-    groupadd --non-unique --gid "${VIDEO_GROUP_ID}" two && \
-    useradd --non-unique --create-home --uid "${USER_ID}" --gid "${GROUP_ID}" --groups one,two user
+    useradd --non-unique --create-home --uid "${USER_ID}" --gid "${GROUP_ID}" user && \
+    for group in ${EXTRA_GROUP_IDS:-}; do \
+        groupadd --non-unique --gid "${group}" "group_${group}" && \
+        usermod --append --groups "group_${group}" user; \
+    done
 USER user
 
 # Add App
