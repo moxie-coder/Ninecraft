@@ -1006,6 +1006,9 @@ bool AppPlatform_linux$hasBuyButtonWhenInvalidLicense(AppPlatform_linux *app_pla
 
 void AppPlatform_linux$hideKeyboard(AppPlatform_linux *app_platform) {
     //puts("debug: AppPlatform_linux::hideKeyboard");
+    if (is_keyboard_visible) {
+        SDL_StopTextInput();
+    }
     is_keyboard_visible = false;
 }
 
@@ -1182,11 +1185,17 @@ void AppPlatform_linux$showDialog(AppPlatform_linux *app_platform, int dialog_id
 
 void AppPlatform_linux$showKeyboard(AppPlatform_linux *app_platform) {
     //puts("debug: AppPlatform_linux::showKeyboard");
+    if (!is_keyboard_visible) {
+        SDL_StartTextInput();
+    }
     is_keyboard_visible = true;
 }
 
 void AppPlatform_linux$showKeyboard2(AppPlatform_linux *app_platform, bool show) {
     //puts("debug: AppPlatform_linux::showKeyboard2");
+    if (!is_keyboard_visible) {
+        SDL_StartTextInput();
+    }
     is_keyboard_visible = true;
 }
 

@@ -244,6 +244,7 @@ static void touch_feed(struct SDL_Window *window, char button, char type, float 
     ypos *= height;
     xrel *= width;
     yrel *= height;
+    // TODO Support 0.12
     if (version_id == version_id_0_1_0) {
         ((void (*)(int, int, int, int))android_dlsym(handle, "_ZN5Mouse4feedEiiii"))(button, type, (int)xpos, (int)ypos);
     } else if (version_id >= version_id_0_6_0 && version_id < version_id_0_12_1) {
@@ -749,7 +750,7 @@ float calculate_scale(int width, int height, float dpi) {
 }
 
 static void set_ninecraft_size(int width, int height) {
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT); // Needed To Fix v0.8.1 On Some Systems
     float ddpi = 96.0f;
     SDL_GetDisplayDPI(SDL_GetWindowDisplayIndex(_window), &ddpi, NULL, NULL);
     float scale = calculate_scale(width, height, ddpi);    

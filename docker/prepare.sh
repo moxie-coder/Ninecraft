@@ -4,7 +4,7 @@ set -e
 cd "$(dirname "$0")"
 
 # Constants
-VERSION='trixie'
+export VERSION='trixie'
 
 # Arguments
 TYPE="$1"
@@ -25,13 +25,9 @@ case "${ARCH}" in
         exit 1
         ;;
 esac
+export CONTAINER_PREFIX
 
 # Functions
-get() {
-    VAR="$1"
-    eval "VALUE=\${${VAR}}"
-    echo "${VAR}=${VALUE}"
-}
 gid() {
     NAME="$1"
     getent group "${NAME}" | cut -d: -f3
@@ -42,9 +38,9 @@ cd "${TYPE}"
 docker build \
     --tag "ninecraft-${TYPE}-${ARCH}" \
     --platform "${PLATFORM}" \
-    --build-arg "$(get VERSION)" \
-    --build-arg "$(get CONTAINER_PREFIX)" \
+    --build-arg VERSION \
+    --build-arg CONTAINER_PREFIX \
     --build-arg "USER_ID=$(id -u)" \
     --build-arg "GROUP_ID=$(id -g)" \
-    --build-arg "EXTRA_GROUP_IDS=$(gid render) $(gid video) $(gid audio)" \
+    --build-arg "EXTRA_GROUP_IDS=$(gid render) $(gid video) $(gid input)" \
     .
