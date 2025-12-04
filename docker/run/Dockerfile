@@ -4,7 +4,7 @@
 # Base Container
 ARG CONTAINER_PREFIX
 ARG VERSION
-FROM "${CONTAINER_PREFIX}debian:${VERSION}"
+FROM ${CONTAINER_PREFIX}debian:${VERSION}
 
 # Install Dependencies
 RUN \

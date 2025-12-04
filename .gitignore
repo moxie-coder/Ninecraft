@@ -28,5 +28,6 @@ a.out
 result/
 result
 result*
+!/docker/build
 /docker/run/ninecraft
 /.idea

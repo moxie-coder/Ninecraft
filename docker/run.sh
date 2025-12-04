@@ -3,25 +3,12 @@
 set -e
 
 # Utility Functions
-error() {
-    echo "ERROR:" "$@"
-    exit 1
-}
-info() {
-    echo "INFO:" "$@"
-}
-require_file() {
-    FILE="$1"
-    if [ ! -e "${FILE}" ]; then
-        error "Missing File: ${FILE}"
-    fi
-}
+. "$(dirname "$0")/common.sh"
 
 # Arguments
 ARCH="$1"
-if [ -z "${ARCH}" ]; then
-    error 'Missing Architecture'
-fi
+validate_arch
+require_file "lib/${ANDROID_ARCH}/libminecraftpe.so"
 
 # Basic Arguments
 set -- docker run \
@@ -44,13 +31,14 @@ set -- "$@" \
     --publish "$(pass_port 19132 udp)" \
     --publish "$(pass_port 4711 tcp)"
 
-# HUD (https://docs.mesa3d.org/envvars.html#gallium-environment-variables)
+# HUD
+# See: https://docs.mesa3d.org/envvars.html#gallium-environment-variables
 set -- "$@" \
     --env GALLIUM_HUD
 
 # Wayland/X11
 using() {
-    info "Using" "$@"
+    info 'Using' "$@"
 }
 pass_volume() {
     VAR="$1"

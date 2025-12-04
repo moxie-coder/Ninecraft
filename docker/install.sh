@@ -5,19 +5,23 @@ set -e
 # Constants
 ID='io.github.mfdgaming.Ninecraft'
 
-# Arguments
-ARCH="$1"
-
 # Paths
+DATA_ROOT="${HOME}/.local/share"
 APK_ROOT="$(pwd)"
 SRC_ROOT="$(dirname "$0")"
-DATA_ROOT="${HOME}/.local/share"
+. "${SRC_ROOT}/common.sh"
+
+# Arguments
+ARCH="$1"
+validate_arch
 
 # Copy Icon
+info 'Copying Icon...'
 ICON="${DATA_ROOT}/icons/hicolor/512x512/apps/${ID}.png"
 cp "${APK_ROOT}/res/drawable/iconx.png" "${ICON}"
 
 # Generate Desktop Entry
+info 'Creating Desktop Entry...'
 APPS="${DATA_ROOT}/applications"
 cat > "${APPS}/${ID}.desktop" <<EOF
 [Desktop Entry]

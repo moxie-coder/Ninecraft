@@ -1,7 +1,10 @@
 #!/bin/sh
 
 set -e
+
+# Prepare
 cd "$(dirname "$0")"
+. ./common.sh
 
 # Constants
 export VERSION='trixie'
@@ -9,34 +12,21 @@ export VERSION='trixie'
 # Arguments
 TYPE="$1"
 ARCH="$2"
-
-# Select Architecture
-case "${ARCH}" in
-    i686)
-        PLATFORM='linux/386'
-        CONTAINER_PREFIX='i386/'
-        ;;
-    arm)
-        PLATFORM='linux/arm/v7'
-        CONTAINER_PREFIX='arm32v7/'
-        ;;
-    *)
-        echo "Unsupported Architecture: ${ARCH}"
-        exit 1
-        ;;
-esac
+validate_arch
 export CONTAINER_PREFIX
 
-# Functions
+# Get Group ID
 gid() {
     NAME="$1"
     getent group "${NAME}" | cut -d: -f3
 }
 
 # Build
+TAG="ninecraft-${TYPE}-${ARCH}"
+info "Building Docker Image: ${TAG}..."
 cd "${TYPE}"
 docker build \
-    --tag "ninecraft-${TYPE}-${ARCH}" \
+    --tag "${TAG}" \
     --platform "${PLATFORM}" \
     --build-arg VERSION \
     --build-arg CONTAINER_PREFIX \
