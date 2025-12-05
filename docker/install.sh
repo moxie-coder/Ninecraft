@@ -4,6 +4,7 @@ set -e
 
 # Constants
 ID='io.github.mfdgaming.Ninecraft'
+NAME='ninecraft'
 
 # Paths
 DATA_ROOT="${HOME}/.local/share"
@@ -15,10 +16,27 @@ SRC_ROOT="$(dirname "$0")"
 ARCH="$1"
 validate_arch
 
+# Generate Launcher Script
+info 'Creating Launcher...'
+LINK="${HOME}/.local/bin/${NAME}"
+LAUNCHER="${LINK}-${ARCH}"
+cat > "${LAUNCHER}" <<EOF
+#!/bin/sh
+set -e
+exec "${SRC_ROOT}/run.sh" "${ARCH}"
+EOF
+chmod +x "${LAUNCHER}"
+ln --symbolic --force "${LAUNCHER}" "${LINK}"
+
 # Copy Icon
+ICON_SRC="${APK_ROOT}/res/drawable/iconx.png"
+if [ ! -f "${ICON_SRC}" ]; then
+    info 'Skipping Desktop Entry'
+    exit 0
+fi
 info 'Copying Icon...'
-ICON="${DATA_ROOT}/icons/hicolor/512x512/apps/${ID}.png"
-cp "${APK_ROOT}/res/drawable/iconx.png" "${ICON}"
+ICON_DST="${DATA_ROOT}/icons/hicolor/512x512/apps/${ID}.png"
+cp "${ICON_SRC}" "${ICON_DST}"
 
 # Generate Desktop Entry
 info 'Creating Desktop Entry...'
@@ -27,9 +45,9 @@ cat > "${APPS}/${ID}.desktop" <<EOF
 [Desktop Entry]
 Name=Ninecraft
 Comment=An MCPE Launcher
-Icon=${ICON}
+Icon=${ICON_DST}
 Path=${APK_ROOT}
-Exec=${SRC_ROOT}/run.sh ${ARCH}
+Exec=${LAUNCHER}
 Type=Application
 Categories=Game;
 Terminal=false
