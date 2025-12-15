@@ -29,6 +29,7 @@
 #include <ninecraft/mods/inject.h>
 #include <ninecraft/mods/mod_loader.h>
 #include <ninecraft/app_platform.h>
+#include <ninecraft/ptpatch/apply.h>
 #include <math.h>
 #include <wchar.h>
 #include <wctype.h>
@@ -69,7 +70,7 @@ static float *controller_y_stick;
 
 bool mouse_pointer_hidden = false;
 
-void *load_library(const char *name, bool show_error) {
+void *load_library(const char *name, bool show_error, bool apply_ptpatch) {
 #if defined(__i386__) || defined(_M_IX86)
     char *arch = "x86";
 #else
@@ -87,7 +88,24 @@ void *load_library(const char *name, bool show_error) {
     strcat(fullpath, "/");
     strcat(fullpath, name);
 
-    void *handle = android_dlopen(fullpath, ANDROID_RTLD_LAZY);
+    void *handle;
+    if (apply_ptpatch) {
+        char *patches_path = (char *)malloc(1024);
+        patches_path[0] = '\0';
+        strcat(patches_path, game_parameters.home_path);
+        strcat(patches_path, "/patches");
+        char *patched_file_path = (char *)malloc(1024);
+        strcat(patched_file_path, patches_path);
+        strcat(patched_file_path, "/");
+        strcat(patched_file_path, name);
+        const int ret = apply_ptpatches(fullpath, patched_file_path, patches_path);
+        handle = android_dlopen(ret ? patched_file_path : fullpath, ANDROID_RTLD_LAZY);
+        unlink(patched_file_path);
+        free(patched_file_path);
+        free(patches_path);
+    } else {
+        handle = android_dlopen(fullpath, ANDROID_RTLD_LAZY);
+    }
     if (handle == NULL) {
         const char *e = android_dlerror();
         if (show_error) {
@@ -1835,15 +1853,15 @@ int main(int argc, char **argv) {
     so_libopensles = android_library_create("libOpenSLES.so");
     so_libz = android_library_create("libz.so");
 
-    so_libgnustl_shared = load_library("libgnustl_shared.so", false);
-    so_libfmod = load_library("libfmod.so", false);
+    so_libgnustl_shared = load_library("libgnustl_shared.so", false, false);
+    so_libfmod = load_library("libfmod.so", false, false);
 
     if (so_libfmod) {
         fmod_anjni();
         ((void (*)(JavaVM *, void *))android_dlsym(so_libfmod, "JNI_OnLoad"))(android_JavaVM, NULL);
     }
 
-    handle = load_library("libminecraftpe.so", true);
+    handle = load_library("libminecraftpe.so", true, true);
 
     if (!handle) {
         puts("libminecraftpe.so not loaded");

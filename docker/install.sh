@@ -9,7 +9,7 @@ NAME='ninecraft'
 # Paths
 DATA_ROOT="${HOME}/.local/share"
 APK_ROOT="$(pwd)"
-SRC_ROOT="$(dirname "$0")"
+SRC_ROOT="$(realpath "$(dirname "$0")")"
 . "${SRC_ROOT}/common.sh"
 
 # Arguments
