@@ -2385,8 +2385,16 @@ int main(int argc, char **argv) {
             } else if (event.type == SDL_FINGERDOWN || event.type == SDL_FINGERUP || event.type == SDL_FINGERMOTION) {
                 char id = touch_get_id(event.tfinger.touchId, event.tfinger.fingerId);
                 touch_callback(_window, event.tfinger.x, event.tfinger.y, event.tfinger.dx, event.tfinger.dy, event.type, id);
-            } else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-                resize_callback(_window);
+            } else if (event.type == SDL_WINDOWEVENT) {
+                if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                    resize_callback(_window);
+                } else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
+                    // SDL_GetWindowGrab() always returns false when focus has been lost.
+                    if (SDL_GetRelativeMouseMode() == SDL_TRUE) {
+                        key_callback(_window, SDLK_ESCAPE, 0, SDL_KEYDOWN, KMOD_NONE);
+                        key_callback(_window, SDLK_ESCAPE, 0, SDL_KEYUP, KMOD_NONE);
+                    }
+                }
             }
         }
     }
