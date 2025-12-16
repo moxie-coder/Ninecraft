@@ -1205,15 +1205,18 @@ void AppPlatform_linux$uploadPlatformDependentData(AppPlatform_linux *app_platfo
 
 void AppPlatform_linux$vibrate(AppPlatform_linux *app_platform, int milliseconds) {
     //puts("debug: AppPlatform_linux::vibrate");
+    // Some Vibration Motors Ignore Short Vibrations
+    static int min_milliseconds = 150;
+    if (milliseconds < min_milliseconds) {
+        milliseconds = min_milliseconds;
+    }
+    // Play Vibration
     SDL_Haptic *haptic = SDL_HapticOpen(0);
     if (haptic == NULL) {
         return;
     }
-    if (SDL_HapticRumbleInit(haptic) != 0) {
-        return;
-    }
-    if (SDL_HapticRumblePlay(haptic, 1, milliseconds) != 0) {
-        return;
+    if (SDL_HapticRumbleInit(haptic) == 0) {
+        SDL_HapticRumblePlay(haptic, 1, milliseconds);
     }
     SDL_HapticClose(haptic);
 }
