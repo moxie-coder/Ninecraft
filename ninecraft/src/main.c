@@ -56,6 +56,7 @@
 
 void *handle = NULL;
 struct SDL_Window *_window = NULL;
+SDL_Haptic *_haptic = NULL;
 bool ctrl_pressed = false;
 bool is_fullscreen = false;
 
@@ -1776,7 +1777,6 @@ int main(int argc, char **argv) {
         return 1;
     }
     SDL_StopTextInput();
-    SDL_Init(SDL_INIT_HAPTIC);
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
@@ -1866,6 +1866,10 @@ int main(int argc, char **argv) {
 
     if (!handle) {
         puts("libminecraftpe.so not loaded");
+        audio_engine_destroy();
+        SDL_GL_DeleteContext(gl_context);
+        SDL_DestroyWindow(_window);
+        SDL_Quit();
         free(storage_path);
         free(mods_path);
         free(global_overrides_path);
@@ -1877,12 +1881,20 @@ int main(int argc, char **argv) {
     android_alloc_setup_hooks(handle);
 
     if (!detect_version()) {
+        audio_engine_destroy();
+        SDL_GL_DeleteContext(gl_context);
+        SDL_DestroyWindow(_window);
+        SDL_Quit();
         free(storage_path);
         free(mods_path);
         free(global_overrides_path);
         free(ovc_path);
         free(icon_path);
         return 1;
+    }
+
+    if (SDL_Init(SDL_INIT_HAPTIC) >= 0) {
+        _haptic = SDL_HapticOpen(0);
     }
 
     multitouch_setup_hooks(handle);
@@ -2397,6 +2409,9 @@ int main(int argc, char **argv) {
                 }
             }
         }
+    }
+    if (_haptic) {
+        SDL_HapticClose(_haptic);
     }
     audio_engine_destroy();
     SDL_GL_DeleteContext(gl_context);

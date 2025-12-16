@@ -29,6 +29,7 @@ ninecraft_options_t platform_options = {
     .capasity = 0
 };
 bool is_keyboard_visible = false;
+extern SDL_Haptic *_haptic;
 
 void *app_platform_vtable_0_1_0[] = {
     (void *)AppPlatform_linux$saveScreenshot,
@@ -1211,14 +1212,9 @@ void AppPlatform_linux$vibrate(AppPlatform_linux *app_platform, int milliseconds
         milliseconds = min_milliseconds;
     }
     // Play Vibration
-    SDL_Haptic *haptic = SDL_HapticOpen(0);
-    if (haptic == NULL) {
-        return;
+    if (_haptic && SDL_HapticRumbleInit(_haptic) == 0) {
+        SDL_HapticRumblePlay(_haptic, 1, milliseconds);
     }
-    if (SDL_HapticRumbleInit(haptic) == 0) {
-        SDL_HapticRumblePlay(haptic, 1, milliseconds);
-    }
-    SDL_HapticClose(haptic);
 }
 
 void AppPlatform_linux$destroy(AppPlatform_linux *app_platform) {
