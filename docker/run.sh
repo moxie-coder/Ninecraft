@@ -22,14 +22,8 @@ set -- "$@" \
     --workdir "${DATA_ROOT}"
 
 # Networking
-pass_port() {
-    PORT="$1"
-    TYPE="$2"
-    echo "${PORT}:${PORT}/${TYPE}"
-}
 set -- "$@" \
-    --publish "$(pass_port 19132 udp)" \
-    --publish "$(pass_port 4711 tcp)"
+    --network host
 
 # HUD
 # See: https://docs.mesa3d.org/envvars.html#gallium-environment-variables

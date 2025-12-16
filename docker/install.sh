@@ -18,15 +18,17 @@ validate_arch
 
 # Generate Launcher Script
 info 'Creating Launcher...'
-LINK="${HOME}/.local/bin/${NAME}"
-LAUNCHER="${LINK}-${ARCH}"
-cat > "${LAUNCHER}" <<EOF
+BIN_DIR="${HOME}/.local/bin"
+mkdir -p "${BIN_DIR}"
+SHORT_BIN_PATH="${BIN_DIR}/${NAME}"
+LONG_BIN_PATH="${SHORT_BIN_PATH}-${ARCH}"
+cat > "${LONG_BIN_PATH}" <<EOF
 #!/bin/sh
 set -e
 exec "${SRC_ROOT}/run.sh" "${ARCH}"
 EOF
-chmod +x "${LAUNCHER}"
-ln --symbolic --force "${LAUNCHER}" "${LINK}"
+chmod +x "${LONG_BIN_PATH}"
+ln -sf "${LONG_BIN_PATH}" "${SHORT_BIN_PATH}"
 
 # Copy Icon
 ICON_SRC="${APK_ROOT}/res/drawable/iconx.png"
@@ -35,23 +37,26 @@ if [ ! -f "${ICON_SRC}" ]; then
     exit 0
 fi
 info 'Copying Icon...'
-ICON_DST="${DATA_ROOT}/icons/hicolor/512x512/apps/${ID}.png"
+ICON_DIR="${DATA_ROOT}/icons/hicolor/512x512/apps"
+mkdir -p "${ICON_DIR}"
+ICON_DST="${ICON_DIR}/${ID}.png"
 cp "${ICON_SRC}" "${ICON_DST}"
 
 # Generate Desktop Entry
 info 'Creating Desktop Entry...'
-APPS="${DATA_ROOT}/applications"
-cat > "${APPS}/${ID}.desktop" <<EOF
+APPS_DIR="${DATA_ROOT}/applications"
+mkdir -p "${APPS_DIR}"
+cat > "${APPS_DIR}/${ID}.desktop" <<EOF
 [Desktop Entry]
 Name=Ninecraft
 Comment=An MCPE Launcher
 Icon=${ICON_DST}
 Path=${APK_ROOT}
-Exec=${LAUNCHER}
+Exec=${LONG_BIN_PATH}
 Type=Application
 Categories=Game;
 Terminal=false
 StartupNotify=false
 StartupWMClass=ninecraft
 EOF
-update-desktop-database "${APPS}"
+update-desktop-database "${APPS_DIR}"

@@ -28,6 +28,7 @@ cd "${TYPE}"
 docker build \
     --tag "${TAG}" \
     --platform "${PLATFORM}" \
+    --network host \
     --build-arg VERSION \
     --build-arg CONTAINER_PREFIX \
     --build-arg "USER_ID=$(id -u)" \

@@ -22,6 +22,7 @@ BUILD="build-docker-${ARCH}"
 mkdir -p "${ROOT}/${BUILD}"
 docker run \
     --rm \
+    --network none \
     --volume "${ROOT}:${DATA}" \
     --workdir "${DATA}/${BUILD}" \
     "ninecraft-build-${ARCH}" \
