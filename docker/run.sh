@@ -66,12 +66,16 @@ fi
 
 # Vibration
 for DEVICE in /sys/class/input/event*; do
-    if [ -e "${DEVICE}" ] && [ -f "${DEVICE}/device/force_feedback/ff_effects_max" ]; then
-        NAME="$(basename "${DEVICE}")"
-        info "Adding Force-Feedback Device: ${NAME}"
-        set -- "$@" \
-            --device "/dev/${NAME}"
-    fi
+    # Check Capabilities
+    FF_CAPABILITIES_FILE="${DEVICE}/device/capabilities/ff"
+    [ -r "${FF_CAPABILITIES_FILE}" ] || continue
+    read -r FF_CAPABILITIES < "${FF_CAPABILITIES_FILE}"
+    [ "${FF_CAPABILITIES}" != '0' ] || continue
+    # Add Device
+    NAME="$(basename "${DEVICE}")"
+    info "Adding Force-Feedback Device: ${NAME}"
+    set -- "$@" \
+        --device "/dev/input/${NAME}"
 done
 
 # Audio
